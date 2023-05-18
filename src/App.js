@@ -17,15 +17,8 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-import {
-  RecoilRoot,
-  atom,
-  selector,
-  useRecoilState,
-  useSetRecoilState,
-  useRecoilValue,
-  atomFamily,
-} from "recoil";
+import { RecoilRoot, atom, useRecoilState } from "recoil";
+import { recoilPersist } from "recoil-persist";
 
 const muiThemePaletteKeys = [
   "background",
@@ -40,7 +33,10 @@ const muiThemePaletteKeys = [
   "warning",
 ];
 
-function NewTodoForm({ todosState, noticeSnackbarState }) {
+function NewTodoForm() {
+  const todosState = useTodosState();
+  const noticeSnackbarState = useNoticeSnackbarState();
+
   const onSubmit = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -62,7 +58,7 @@ function NewTodoForm({ todosState, noticeSnackbarState }) {
     <>
       <form className="flex flex-col mt-5 px-4 gap-2" onSubmit={onSubmit}>
         <TextField
-          label="Multiline"
+          label="Todo"
           multiline
           minRows={3}
           name="content"
@@ -79,34 +75,7 @@ function NewTodoForm({ todosState, noticeSnackbarState }) {
   );
 }
 
-function TodoListItem({ todosState, todo, index, openDrawer }) {
-  const [editMode, setEditMode] = useState(false);
-  const [editContent, setEditContent] = useState(todo.content);
-  const editContentInputRef = useRef(null);
-
-  const removeTodo = () => {
-    todosState.removeTodo(index);
-  };
-
-  const showEdit = () => {
-    setEditMode(true);
-  };
-
-  const cancleEdit = () => {
-    setEditMode(false);
-    setEditContent(todo.content);
-  };
-
-  const commitEdit = () => {
-    if (editContent.trim().length == 0) {
-      alert("Enter Content");
-      editContentInputRef.current.focus();
-      return;
-    }
-    setEditMode(false);
-    todosState.updateTodo(index, editContent.trim());
-  };
-
+function TodoListItem({ todo, openDrawer }) {
   const [checkBox, setCheckBox] = useState(false);
 
   return (
@@ -125,56 +94,35 @@ function TodoListItem({ todosState, todo, index, openDrawer }) {
         variant="outlined"
       />{" "}
       <br />
-      {editMode || (
-        <>
-          <div className="flex mt-4 mb-4 shadow rounded-[20px]">
-            <Button
-              onClick={() => setCheckBox(!checkBox)}
-              className="flex-shrink-0 self-start !rounded-l-[20px]"
-              color="inherit"
-            >
-              <span
-                className={
-                  (checkBox
-                    ? "text-[color:var(--mui-color-primary-main)]"
-                    : "text-[#dcdcdc]") + " text-4xl h-[80px]"
-                }
-              >
-                <i className="fa-solid fa-check"></i>
-              </span>
-            </Button>
-            <div className="w-[2px] bg-[#dcdcdc] mr-4 my-3"></div>
-            <div className="flex-grow flex my-3 items-center whitespace-pre-wrap leading-relaxed hover:text-[color:var(--mui-color-primary-main)]">
-              {todo.content}{" "}
-            </div>
-            <Button
-              onClick={() => openDrawer(todo.id)}
-              className="flex-shrink-0 !pt-2 self-start !rounded-r-[20px]"
-            >
-              <span className="text-[#dcdcdc] text-2xl h-[80px]">
-                <i className="fa-solid fa-ellipsis-vertical"></i>
-              </span>
-            </Button>
-          </div>
-          <button onClick={showEdit}>Update</button>
-        </>
-      )}
-      {editMode && (
-        <>
-          <TextField
-            ref={editContentInputRef}
-            label="Update Todo"
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            variant="outlined"
-          />{" "}
-          &nbsp;
-          <button onClick={commitEdit}>Update</button> &nbsp;
-          <button onClick={cancleEdit}>Cancle</button> &nbsp;
-        </>
-      )}
-      &nbsp;
-      <button onClick={removeTodo}>Delete</button>
+      <div className="flex mt-4 mb-4 shadow rounded-[20px]">
+        <Button
+          onClick={() => setCheckBox(!checkBox)}
+          className="flex-shrink-0 self-start !rounded-l-[20px]"
+          color="inherit"
+        >
+          <span
+            className={
+              (checkBox
+                ? "text-[color:var(--mui-color-primary-main)]"
+                : "text-[#dcdcdc]") + " text-4xl h-[80px]"
+            }
+          >
+            <i className="fa-solid fa-check"></i>
+          </span>
+        </Button>
+        <div className="w-[2px] bg-[#dcdcdc] mr-4 my-3"></div>
+        <div className="flex-grow flex my-3 items-center whitespace-pre-wrap leading-relaxed hover:text-[color:var(--mui-color-primary-main)]">
+          {todo.content}{" "}
+        </div>
+        <Button
+          onClick={() => openDrawer(todo.id)}
+          className="flex-shrink-0 !pt-2 self-start !rounded-r-[20px]"
+        >
+          <span className="text-[#dcdcdc] text-2xl h-[80px]">
+            <i className="fa-solid fa-ellipsis-vertical"></i>
+          </span>
+        </Button>
+      </div>
     </li>
   );
 }
@@ -211,13 +159,10 @@ function useEditModalTodoState() {
   };
 }
 
-function EditTodoModal({
-  todosState,
-  state,
-  todo,
-  closeDrawer,
-  noticeSnackbarState,
-}) {
+function EditTodoModal({ state, todo, closeDrawer }) {
+  const todosState = useTodosState();
+  const noticeSnackbarState = useNoticeSnackbarState();
+
   const close = () => {
     state.closeModal();
     closeDrawer();
@@ -265,7 +210,10 @@ function EditTodoModal({
   );
 }
 
-function TodoOptionDrawer({ todosState, state, noticeSnackbarState }) {
+function TodoOptionDrawer({ state }) {
+  const todosState = useTodosState();
+  const noticeSnackbarState = useNoticeSnackbarState();
+
   const removeTodo = () => {
     if (window.confirm(`No : ${state.todoId} Delete it?`) == false) {
       state.close();
@@ -284,10 +232,8 @@ function TodoOptionDrawer({ todosState, state, noticeSnackbarState }) {
     <>
       <EditTodoModal
         state={editModalTodoState}
-        todosState={todosState}
         todo={todo}
         closeDrawer={state.close}
-        noticeSnackbarState={noticeSnackbarState}
       />
       <SwipeableDrawer
         anchor={"bottom"}
@@ -320,24 +266,19 @@ function TodoOptionDrawer({ todosState, state, noticeSnackbarState }) {
   );
 }
 
-function TodoList({ todosState, noticeSnackbarState }) {
+function TodoList() {
+  const todosState = useTodosState();
   const todoOptionDrawerState = useTodoOptionDrawerState();
 
   return (
     <>
-      <TodoOptionDrawer
-        todosState={todosState}
-        state={todoOptionDrawerState}
-        noticeSnackbarState={noticeSnackbarState}
-      />
+      <TodoOptionDrawer state={todoOptionDrawerState} />
       <div>
         <ul className="mt-4 px-4">
           {todosState.todos.map((el, index) => (
             <TodoListItem
               key={el.id}
-              todosState={todosState}
               todo={el}
-              index={index}
               openDrawer={todoOptionDrawerState.openDrawer}
             />
           ))}
@@ -347,30 +288,62 @@ function TodoList({ todosState, noticeSnackbarState }) {
   );
 }
 
-function TodoApp({ todosState, noticeSnackbarState }) {
+function TodoApp() {
   return (
     <>
-      <NewTodoForm
-        todosState={todosState}
-        noticeSnackbarState={noticeSnackbarState}
-      />
+      <NewTodoForm />
 
       <hr />
       {/* todos: {JSON.stringify(todos)} */}
-      <TodoList
-        todosState={todosState}
-        noticeSnackbarState={noticeSnackbarState}
-      />
+      <TodoList />
     </>
   );
 }
 
+const { persistAtom: persistAtomTodos } = recoilPersist({
+  key: "persistAtomTodos",
+});
+const { persistAtom: persistAtomLastTodoId } = recoilPersist({
+  key: "persistAtomLastTodoId",
+});
+
+const todosAtom = atom({
+  key: "app/todosAtom",
+  default: [
+    {
+      id: 3,
+      regDate: "2023-02-25 18:13:14",
+      content: "PoPong",
+    },
+    {
+      id: 2,
+      regDate: "2023-02-24 15:11:34",
+      content: "Traio",
+    },
+    {
+      id: 1,
+      regDate: "2023-02-23 12:12:34",
+      content: "Zkind",
+    },
+  ],
+  effects_UNSTABLE: [persistAtomTodos],
+});
+
+const lastTodoIdAtom = atom({
+  key: "app/lastTodoIdAtom",
+  default: 3,
+  effects_UNSTABLE: [persistAtomLastTodoId],
+});
+
 function useTodosState() {
-  const [todos, setTodos] = useState([]);
-  const todoId = useRef(0);
+  const [todos, setTodos] = useRecoilState(todosAtom);
+  const [lastTodoId, setLastTodoId] = useRecoilState(lastTodoIdAtom);
+  const todoId = useRef(lastTodoId);
+  todoId.current = lastTodoId;
 
   const addTodo = (newContent) => {
     const id = ++todoId.current;
+    setLastTodoId(id);
     const newTodo = {
       id: id,
       content: newContent,
@@ -379,7 +352,7 @@ function useTodosState() {
     // const newTodos = [...todos, newTodo];
     // setTodos(newTodos);
 
-    setTodos((todos) => [...todos, newTodo]);
+    setTodos((todos) => [newTodo, ...todos]);
     return id;
   };
 
@@ -446,7 +419,8 @@ function dateToStr(date) {
   );
 }
 
-function NoticeSnackbar({ state }) {
+function NoticeSnackbar() {
+  const state = useNoticeSnackbarState();
   return (
     <>
       <Snackbar
@@ -460,21 +434,29 @@ function NoticeSnackbar({ state }) {
   );
 }
 
+const noticeSnackbarInfoAtom = atom({
+  key: "app/noticeSnackbarInfoAtom",
+  default: {
+    open: false,
+    msg: "",
+    severity: "",
+    autoHideDuration: 0,
+  },
+});
+
 function useNoticeSnackbarState() {
-  const [open, setOpen] = useState(false);
-  const [msg, setMsg] = useState(null);
-  const [severity, setSeverity] = useState(null);
-  const [autoHideDuration, setAutoHideDuration] = useState(null);
+  const [noticeSnackbarInfo, setNoticeSnackbarInfo] = useRecoilState(
+    noticeSnackbarInfoAtom
+  );
+
+  const { open, msg, severity, autoHideDuration } = noticeSnackbarInfo;
 
   const openBar = (msg, severity = "success", autoHideDuration = 6000) => {
-    setOpen(true);
-    setMsg(msg);
-    setSeverity(severity);
-    setAutoHideDuration(autoHideDuration);
+    setNoticeSnackbarInfo({ open: true, msg, severity, autoHideDuration });
   };
 
   const closeBar = () => {
-    setOpen(false);
+    setNoticeSnackbarInfo({ ...noticeSnackbarInfo, open: false });
   };
 
   return {
@@ -493,14 +475,24 @@ const Alert = React.forwardRef((props, ref) => {
 
 function App() {
   const todosState = useTodosState();
-  const noticeSnackbarState = useNoticeSnackbarState();
 
-  useEffect(() => {
-    todosState.addTodo("Study");
-    todosState.addTodo("Play");
-    todosState.addTodo("PoPong");
-  }, []);
+  return (
+    <>
+      <AppBar position="fixed">
+        <Toolbar>
+          <Box className="flex-1"></Box>
+          <span className="font-bold">HAPPY NOTE</span>
+          <Box className="flex-1"></Box>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
+      <TodoApp />
+      <NoticeSnackbar />
+    </>
+  );
+}
 
+function Root() {
   const theme = createTheme({
     typography: {
       fontFamily: ["GmarketSansMedium"],
@@ -527,26 +519,12 @@ function App() {
   }, []);
 
   return (
-    <>
-      <RecoilRoot>
-        <ThemeProvider theme={theme}>
-          <AppBar position="fixed">
-            <Toolbar>
-              <Box className="flex-1"></Box>
-              <span className="font-bold">HAPPY NOTE</span>
-              <Box className="flex-1"></Box>
-            </Toolbar>
-          </AppBar>
-          <Toolbar />
-          <TodoApp
-            todosState={todosState}
-            noticeSnackbarState={noticeSnackbarState}
-          />
-          <NoticeSnackbar state={noticeSnackbarState} />
-        </ThemeProvider>
-      </RecoilRoot>
-    </>
+    <RecoilRoot>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </RecoilRoot>
   );
 }
 
-export default App;
+export default Root;
