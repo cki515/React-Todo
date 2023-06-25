@@ -42,7 +42,7 @@ function NewTodoForm() {
     const form = e.target;
     form.content.value = form.content.value.trim();
 
-    if (form.content.value.length == 0) {
+    if (form.content.value.length === 0) {
       alert("Enter Todo");
       form.content.focus();
       return;
@@ -57,13 +57,7 @@ function NewTodoForm() {
   return (
     <>
       <form className="flex flex-col mt-5 px-4 gap-2" onSubmit={onSubmit}>
-        <TextField
-          label="Todo"
-          multiline
-          minRows={3}
-          name="content"
-          defaultValue=""
-        />
+        <TextField label="Todo" multiline minRows={3} name="content" defaultValue="" />
         <Button type="submit" variant="contained">
           Add
         </Button>
@@ -80,20 +74,8 @@ function TodoListItem({ todo, openDrawer }) {
 
   return (
     <li>
-      <Chip
-        className="!pt-1"
-        label={`No : ${todo.id}`}
-        size="small"
-        color="secondary"
-        variant="outlined"
-      />{" "}
-      &nbsp;
-      <Chip
-        className="!pt-1"
-        label={`Time: ${todo.regDate}`}
-        variant="outlined"
-      />{" "}
-      <br />
+      <Chip className="!pt-1" label={`No : ${todo.id}`} size="small" color="secondary" variant="outlined" /> &nbsp;
+      <Chip className="!pt-1" label={`Time: ${todo.regDate}`} variant="outlined" /> <br />
       <div className="flex mt-4 mb-4 shadow rounded-[20px]">
         <Button
           onClick={() => setCheckBox(!checkBox)}
@@ -102,9 +84,7 @@ function TodoListItem({ todo, openDrawer }) {
         >
           <span
             className={
-              (checkBox
-                ? "text-[color:var(--mui-color-primary-main)]"
-                : "text-[#dcdcdc]") + " text-4xl h-[80px]"
+              (checkBox ? "text-[color:var(--mui-color-primary-main)]" : "text-[#dcdcdc]") + " text-4xl h-[80px]"
             }
           >
             <i className="fa-solid fa-check"></i>
@@ -114,10 +94,7 @@ function TodoListItem({ todo, openDrawer }) {
         <div className="flex-grow flex my-3 items-center whitespace-pre-wrap leading-relaxed hover:text-[color:var(--mui-color-primary-main)]">
           {todo.content}{" "}
         </div>
-        <Button
-          onClick={() => openDrawer(todo.id)}
-          className="flex-shrink-0 !pt-2 self-start !rounded-r-[20px]"
-        >
+        <Button onClick={() => openDrawer(todo.id)} className="flex-shrink-0 !pt-2 self-start !rounded-r-[20px]">
           <span className="text-[#dcdcdc] text-2xl h-[80px]">
             <i className="fa-solid fa-ellipsis-vertical"></i>
           </span>
@@ -132,7 +109,6 @@ function useTodoOptionDrawerState() {
   const open = useMemo(() => todoId !== null, [todoId]);
   const close = () => setTodoId(null);
   const openDrawer = (id) => setTodoId(id);
-
   return {
     todoId,
     open,
@@ -173,7 +149,7 @@ function EditTodoModal({ state, todo, closeDrawer }) {
     const form = e.target;
     form.content.value = form.content.value.trim();
 
-    if (form.content.value.length == 0) {
+    if (form.content.value.length === 0) {
       alert("Enter Todo");
       form.content.focus();
       return;
@@ -186,20 +162,10 @@ function EditTodoModal({ state, todo, closeDrawer }) {
 
   return (
     <>
-      <Modal
-        open={state.open}
-        onClose={close}
-        className="flex items-center justify-center"
-      >
+      <Modal open={state.open} onClose={close} className="flex items-center justify-center">
         <div className="bg-white p-5 rounded-[20px] w-full max-w-xl">
           <form className="flex flex-col gap-2" onSubmit={onSubmit}>
-            <TextField
-              label="Multiline"
-              multiline
-              minRows={3}
-              name="content"
-              defaultValue={todo?.content}
-            />
+            <TextField label="Todo" multiline minRows={3} name="content" defaultValue={todo?.content} />
             <Button type="submit" variant="contained">
               update
             </Button>
@@ -215,7 +181,7 @@ function TodoOptionDrawer({ state }) {
   const noticeSnackbarState = useNoticeSnackbarState();
 
   const removeTodo = () => {
-    if (window.confirm(`No : ${state.todoId} Delete it?`) == false) {
+    if (window.confirm(`No : ${state.todoId} Delete it?`) === false) {
       state.close();
       return;
     }
@@ -230,34 +196,15 @@ function TodoOptionDrawer({ state }) {
 
   return (
     <>
-      <EditTodoModal
-        state={editModalTodoState}
-        todo={todo}
-        closeDrawer={state.close}
-      />
-      <SwipeableDrawer
-        anchor={"bottom"}
-        onOpen={() => {}}
-        open={state.open}
-        onClose={state.close}
-      >
+      <EditTodoModal state={editModalTodoState} todo={todo} closeDrawer={state.close} />
+      <SwipeableDrawer anchor={"bottom"} onOpen={() => {}} open={state.open} onClose={state.close}>
         <List className="!py-0">
-          <ListItem className="!pt-6 !p-5">
-            No : {todo?.id} Option Drawer
-          </ListItem>
+          <ListItem className="!pt-6 !p-5">No : {todo?.id} Option Drawer</ListItem>
           <Divider />
-          <ListItem
-            className="!pt-6 !p-5 !items-baseline"
-            button
-            onClick={editModalTodoState.openModal}
-          >
+          <ListItem className="!pt-6 !p-5 !items-baseline" button onClick={editModalTodoState.openModal}>
             <i className="fa-solid fa-pen-to-square"></i>&nbsp;Update
           </ListItem>
-          <ListItem
-            className="!pt-6 !p-5 !items-baseline"
-            button
-            onClick={removeTodo}
-          >
+          <ListItem className="!pt-6 !p-5 !items-baseline" button onClick={removeTodo}>
             <i className="fa-solid fa-trash-can"></i>&nbsp;Delete
           </ListItem>
         </List>
@@ -276,11 +223,7 @@ function TodoList() {
       <div>
         <ul className="mt-4 px-4">
           {todosState.todos.map((el, index) => (
-            <TodoListItem
-              key={el.id}
-              todo={el}
-              openDrawer={todoOptionDrawerState.openDrawer}
-            />
+            <TodoListItem key={el.id} todo={el} openDrawer={todoOptionDrawerState.openDrawer} />
           ))}
         </ul>
       </div>
@@ -309,29 +252,13 @@ const { persistAtom: persistAtomLastTodoId } = recoilPersist({
 
 const todosAtom = atom({
   key: "app/todosAtom",
-  default: [
-    {
-      id: 3,
-      regDate: "2023-02-25 18:13:14",
-      content: "PoPong",
-    },
-    {
-      id: 2,
-      regDate: "2023-02-24 15:11:34",
-      content: "Traio",
-    },
-    {
-      id: 1,
-      regDate: "2023-02-23 12:12:34",
-      content: "Zkind",
-    },
-  ],
+  default: [],
   effects_UNSTABLE: [persistAtomTodos],
 });
 
 const lastTodoIdAtom = atom({
   key: "app/lastTodoIdAtom",
-  default: 3,
+  default: 0,
   effects_UNSTABLE: [persistAtomLastTodoId],
 });
 
@@ -357,7 +284,7 @@ function useTodosState() {
   };
 
   const removeTodo = (index) => {
-    const newTodos = todos.filter((_, _index) => _index != index);
+    const newTodos = todos.filter((_, _index) => _index !== index);
     setTodos(newTodos);
   };
 
@@ -367,9 +294,7 @@ function useTodosState() {
   };
 
   const updateTodo = (index, newContent) => {
-    const newTodos = todos.map((_, _index) =>
-      _index != index ? _ : { ..._, content: newContent }
-    );
+    const newTodos = todos.map((_, _index) => (_index !== index ? _ : { ..._, content: newContent }));
     setTodos(newTodos);
   };
 
@@ -379,7 +304,7 @@ function useTodosState() {
   };
 
   const findTodoIndexById = (id) => {
-    return todos.findIndex((todo) => todo.id == id);
+    return todos.findIndex((todo) => todo.id === id);
   };
 
   const findTodoById = (id) => {
@@ -423,11 +348,7 @@ function NoticeSnackbar() {
   const state = useNoticeSnackbarState();
   return (
     <>
-      <Snackbar
-        open={state.open}
-        autoHideDuration={state.autoHideDuration}
-        onClose={state.closeBar}
-      >
+      <Snackbar open={state.open} autoHideDuration={state.autoHideDuration} onClose={state.closeBar}>
         <Alert severity={state.severity}>{state.msg}</Alert>
       </Snackbar>
     </>
@@ -445,9 +366,7 @@ const noticeSnackbarInfoAtom = atom({
 });
 
 function useNoticeSnackbarState() {
-  const [noticeSnackbarInfo, setNoticeSnackbarInfo] = useRecoilState(
-    noticeSnackbarInfoAtom
-  );
+  const [noticeSnackbarInfo, setNoticeSnackbarInfo] = useRecoilState(noticeSnackbarInfoAtom);
 
   const { open, msg, severity, autoHideDuration } = noticeSnackbarInfo;
 
@@ -474,8 +393,6 @@ const Alert = React.forwardRef((props, ref) => {
 });
 
 function App() {
-  const todosState = useTodosState();
-
   return (
     <>
       <AppBar position="fixed">
@@ -516,7 +433,7 @@ function Root() {
         }
       }
     });
-  }, []);
+  }, [theme.palette]);
 
   return (
     <RecoilRoot>
